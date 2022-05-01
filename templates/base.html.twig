@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="Доставка азиатских блюд по городу Ижевск" />
+        <meta name="author" content="Илья Главатских" />
+        <title>{% block title %}Азиатская кухня Ижевск{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
+        {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+        {% endblock %}
+
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+        {% endblock %}
+    </head>
+    <body>
+        <!-- Preloader -->
+        <div class="preloader">
+            <div class="preloader__image"></div>
+        </div>
+        {% block main_body %}
+            <div id="app">
+                <!-- Navigation-->
+                <nav class="header-row py-md-3 pt-3 pb-1">
+                    <div class="container d-flex px-4 px-lg-5">
+                        <div class="navbar-logo">
+                            <a class="navbar-brand" href="/">
+                                <img src="/public/logo.png" alt="">
+                            </a>
+                        </div>
+                        <!-- contacts-pc -->
+                        <div class="contacts-pc d-none d-md-inline-flex">
+                            <div class="phone-number">{{ settings.phone }}</div>
+                            <div class="social-icons">
+                                {% if settings.instagram %}
+                                    <a href="{{'https://instagram.com/' ~ settings.instagram }}" target="_blank" class="instagram-icon">
+                                        <i class="fab fa-instagram"></i>
+                                    </a>
+                                {% endif %}
+                                {% if settings.vk %}
+                                    <a href="{{'https://vk.com/' ~ settings.vk }}" target="_blank" class="vk-icon">
+                                        <i class="fab fa-vk"></i>
+                                    </a>
+                                {% endif %}
+                                {% if settings.telegram %}
+                                    <a href="{{'https://telegram.im/@' ~ settings.telegram }}" target="_blank" class="telegram-icon">
+                                        <i class="fab fa-telegram-plane"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% block card_badge %}{% endblock %}
+                    </div>
+                    <!-- contacts-mobile -->
+                    <div class="contacts-mobile d-md-none container d-flex px-4 px-lg-5 mt-2">
+                        <div class="phone-number">
+                            <a href="tel:{{ settings.phone }}" class="text-info">{{ settings.phone }}</a>
+                        </div>
+                        <div class="social-icons">
+                            {% if settings.instagram %}
+                                <a href="{{'https://instagram.com/' ~ settings.instagram }}" target="_blank" class="instagram-icon px-1">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            {% endif %}
+                            {% if settings.vk %}
+                                <a href="{{'https://vk.com/' ~ settings.vk }}" target="_blank" class="vk-icon px-1">
+                                    <i class="fab fa-vk"></i>
+                                </a>
+                            {% endif %}
+                            {% if settings.telegram %}
+                                <a href="{{'https://telegram.im/@' ~ settings.telegram }}" target="_blank" class="telegram-icon px-1">
+                                    <i class="fab fa-telegram-plane"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </nav>
+
+                {% block body %}{% endblock %}
+
+                <!-- Footer-->
+                <footer class="py-5 bg-dark">
+                    <div class="container"><p class="m-0 text-center text-white">&copy; {{ settings.siteName ~ ' ' ~  "now"|date("Y") }}  </p></div>
+                </footer>
+            </div>
+            {% block user_scripts %}{% endblock %}
+        {% endblock %}
+    </body>
+</html>

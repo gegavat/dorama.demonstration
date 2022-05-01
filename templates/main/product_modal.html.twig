@@ -1,0 +1,49 @@
+<div>
+    <img src="{{ imagePath ~ '/' ~ product.imageName }}" alt="" class="img-fluid">
+    <hr>
+    <h2>{{ product.name }}</h2>
+    <div>{{ product.description }}</div>
+    {% if product.weight %}
+        <div><b>Вес: </b>{{ product.weight }} гр.</div>
+    {% endif %}
+    <div><b>Цена: </b>{{ product.priceMain/100 }} руб.</div>
+
+    {% if product.configurators is not empty %}
+        <hr/>
+        <div class="configurators">
+            {% for configurator in product.configurators %}
+                <div
+                    class="fw-bold">{{ configurator.label }}
+                    {% if configurator.isRequired %}
+                        <span class="text-danger">*</span>
+                    {% endif %}
+                </div>
+                <ul class="configurator {{ configurator.isRequired ? 'configurator-required' }}" data-id="{{ configurator.id }}">
+                    {% for item in configurator.configuratorItems %}
+                        <li class="form-check">
+                            <input
+                                class="form-check-input configurator-item"
+                                value="[{{ configurator.id }}][{{ item.id }}]"
+                                name="{{ 'configurator-' ~ configurator.id }}"
+                                id="{{ 'configurator-item-' ~ item.id }}"
+                                data-id="{{ item.id }}"
+                                {% if configurator.isMultiple %}
+                                    type="checkbox"
+                                {% else %}
+                                    type="radio"
+                                {% endif %}
+                                {% if configurator.isRequired and loop.index == 1 %}
+                                    checked
+                                {% endif %}
+                            >
+                            <label class="form-check-label" for="{{ 'configurator-item-' ~ item.id }}">
+                                {{ item.name }} - {{ item.price/100 }} руб.
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>

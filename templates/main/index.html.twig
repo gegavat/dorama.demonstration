@@ -1,0 +1,310 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Азиатская кухня{% endblock %}
+
+{% block user_scripts %}
+    {{ encore_entry_script_tags('worker') }}
+{% endblock %}
+
+{% block card_badge %}
+    <!-- card-badge on the right -->
+    <div class="card-badge">
+        <button class="show-card btn btn-success" type="submit">
+            <i class="bi-cart-fill me-1"></i>
+            <span class="d-none d-lg-inline-flex">Корзина</span>
+            <span class="badge bg-light text-success ms-1 rounded-pill">
+                ${ getCardBadgeText() }$
+            </span>
+        </button>
+    </div>
+{% endblock %}
+
+{% block body %}
+
+    {% if slider is not empty %}
+        <!-- Header-->
+        <header class="main-slider bg-header">
+            {% for slide in slider %}
+                <div
+                    style="background-image: url('{{ sliderImagePath ~ '/' ~ slide.imageName }}')"
+                    class="main-slider-item text-center text-white"
+                >
+                    <div
+                        style="background-color: rgba(0, 0, 0, 0.2)"
+                        class="main-slider-item-cover"
+                    >
+                        <h1 class="slider-header display-4 fw-bolder">{{ slide.header }}</h1>
+                        {% if slide.text %}
+                            <h1 class="slider-text display-4 fw-bolder mt-2">{{ slide.text }}</h1>
+                            {#<p class="slider-text lead fs-1 fw-bold mt-2">{{ slide.text }}</p>#}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </header>
+    {% endif %}
+
+    <!-- Section-->
+    <section class="product-section py-3">
+        <div class="container px-4 px-lg-5 mt-3">
+            <div class="row py-4 gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 cat-group">
+                {# Популярные категории #}
+                <div class="cat-item col mb-3" v-bind:class="{ 'cat-item-active': activeCategory === catPopularId }">
+                    <div class="card">
+                        <span class="fw-bolder cat-item-name" v-on:click="getProductDataByCategory(catPopularId)">
+                            <i class="cat-icon fa-solid fa-thumbs-up"></i> Популярные
+                        </span>
+                    </div>
+                </div>
+                {# Видимые категориии #}
+                {% for category in categoryVisible %}
+                    <div class="cat-item col mb-3" v-bind:class="{ 'cat-item-active': activeCategory === {{ category.id }} }">
+                        <div class="card">
+                            <span
+                                class="fw-bolder cat-item-name"
+                                v-on:click="getProductDataByCategory({{ category.id }})"
+                            >
+                                {% if category.icon %}
+                                    <i class="cat-icon {{ category.icon }}"></i>
+                                {% endif %}
+                                {{ category }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {# "Еще..." категории #}
+                <div class="cat-item col mb-3" v-show="{{ categoryHidden is not empty }} && !hidCatVisibility">
+                    <div class="card">
+                            <span
+                                class="fw-bolder cat-item-name"
+                                v-on:click="trigHidCatVis"
+                            >
+                                <i class="cat-icon fa-solid fa-plus"></i> Ещё...
+                            </span>
+                    </div>
+                </div>
+                {% for category in categoryHidden %}
+                    {# Список скрытых категорий #}
+                    <div class="cat-item col mb-3" v-bind:class="{ 'cat-item-active': activeCategory === {{ category.id }} }" v-if="hidCatVisibility">
+                        <div class="card">
+                            <span
+                                    class="fw-bolder cat-item-name"
+                                    v-on:click="getProductDataByCategory({{ category.id }})"
+                            >
+                                {% if category.icon %}
+                                    <i class="cat-icon {{ category.icon }}"></i>
+                                {% endif %}
+                                {{ category }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="products row py-4 gx-4 gx-lg-5 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+                {# Анимация загрузки продуктов #}
+                <div class="catalog-loading" v-if="!products">
+                    <img src="/public/catalog-loading.svg" alt=""> <br/>
+                    <span>загрузка...</span>
+                </div>
+                {# Отображение загруженных продуктов #}
+                <div class="text-center" v-if="products && products.length === 0">К сожалению, категория пока пустая &#128532;</div>
+                <div class="col mb-5" v-for="product in products" v-if="products">
+                    <div class="card h-100">
+                        <!-- Sale badge-->
+                        <div
+                            v-show="product.price_cross"
+                            class="sale-badge badge bg-success text-white position-absolute"
+                        >
+                            Sale
+                        </div>
+                        <!-- Product image-->
+                        <div
+                            class="product-image"
+                            v-bind:data-id="product.id"
+                            v-on:click="showProductModal(product.id)"
+                        >
+                            <figure class="imghvr-push-up">
+                                <img
+                                    v-bind:src="product.image_name"
+                                    class="card-img-top"
+                                    alt="..."
+                                />
+                                <figcaption>
+                                    <div class="figcaption-desc">${ product.desc_truncated }$</div>
+                                    <button class="btn btn-success">
+                                        Подробнее
+                                    </button>
+                                </figcaption>
+                            </figure>
+                        </div>
+                        <!-- Product details-->
+                        <div class="card-body p-4">
+                            <div class="text-center">
+                                <!-- Product name-->
+                                <h5 class="fw-bolder">${ product.name }$</h5>
+
+                                <!-- Product reviews-->
+                                <div class="d-flex justify-content-center small text-warning mb-2">
+                                    <div
+                                            v-show="product.rating"
+                                            v-for="item in product.rating"
+                                            class="bi-star-fill"
+                                    ></div>
+                                </div>
+
+                                <!-- Product price-->
+                                <span
+                                        v-show="product.price_cross"
+                                        class="text-muted text-decoration-line-through"
+                                >
+                            ${ product.price_cross }$ руб.
+                        </span>
+                                ${ product.price_main }$ руб.
+                            </div>
+                        </div>
+                        <!-- Product actions-->
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                            <div class="text-center">
+                                <div class="add-to-card-empty" v-show="!getCardItem(product.id)">
+                                    <button
+                                        v-on:click="addToCard(product.id, $event)"
+                                        class="site-add-to-card-btn btn btn-outline-success mt-auto"
+                                    >
+                                        В корзину
+                                    </button>
+                                </div>
+                                <div class="add-to-card-filled" v-show="getCardItem(product.id)">
+                                    <button
+                                        v-on:click="removeFromCard(product.id)"
+                                        class="btn btn-success"
+                                    >
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <span class="mx-2">
+                                        ${ getCardProductQuantity(product.id) }$
+                                    </span>
+                                    <button
+                                        v-on:click="addToCard(product.id, $event)"
+                                        class="site-add-to-card-btn btn btn-success"
+                                    >
+                                        <i class="site-add-to-card-btn bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Информация о товаре</h5>
+                    <div class="product-modal-close" v-on:click="closeProductModal">
+                        <i class="far fa-times-circle"></i>
+                    </div>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <div
+                        class="add-to-card-empty"
+                        v-show="!getCardItem(productModalData.id)"
+                    >
+                        <button
+                            v-on:click="addToCard(productModalData.id, $event)"
+                            class="btn btn-outline-success mt-auto"
+                        >
+                            В корзину
+                        </button>
+                    </div>
+                    <div class="add-to-card-filled" v-show="getCardItem(productModalData.id)">
+                        <button
+                            v-on:click="removeFromCard(productModalData.id)"
+                            class="btn btn-success"
+                        >
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <span class="mx-2">
+                            ${ getCardProductQuantity(productModalData.id) }$
+                        </span>
+                        <button
+                                v-on:click="addToCard(productModalData.id, $event)"
+                                class="btn btn-success"
+                        >
+                            <i class="bi bi-plus"></i>
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-secondary product-modal-close" v-on:click="closeProductModal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Modal -->
+    <div id="card-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Корзина</h5>
+                    <div class="card-modal-close">
+                        <i class="far fa-times-circle"></i>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div v-show="cardBadgeText">
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Название</th>
+                                    <th scope="col">Кол.</th>
+                                    <th scope="col">Цена</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(product, index) in card">
+                                    <td>
+                                        <div>${ getProductNameByIdFromBuffer(product.id) }$</div>
+                                        <div class="ingredients" v-for="confItemId in product.configuratorItemIds">
+                                            <div class="ingredient-title text-muted">${ getConfItemDescByIdFromBuffer(confItemId) }$</div>
+                                        </div>
+                                    </td>
+                                    <td class="col-in-row">
+                                        <i role="button" class="bi bi-dash text-success" v-on:click="removeFromCardDirectly(index)"></i>
+                                        <span class="mx-2">${ product.quantity }$</span>
+                                        <i role="button" class="bi bi-plus text-success" v-on:click="addToCardDirectly(index)"></i>
+                                    </td>
+                                    <td class="col-in-row">${ getFullPriceByIndexFromBuffer(index) }$ руб.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br/>
+                        <div class="total-summ">
+                            <span>Итого: </span>
+                            <span>${ cardBadgeText }$</span>
+                        </div>
+                    </div>
+                    <div class="text-danger" v-show="!cardBadgeText">Корзина пуста</div>
+                </div>
+                <div class="modal-footer">
+                    <a
+                        class="btn btn-success"
+                        v-show="cardBadgeText"
+                        v-bind:href="getOrderLink()"
+                        target="_blank"
+                    >
+                        Оформить заказ
+                    </a>
+                    <button type="button" class="btn btn-secondary card-modal-close">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

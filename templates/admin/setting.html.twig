@@ -1,0 +1,7 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% form_theme setting_form 'bootstrap_5_layout.html.twig' %}
+
+{% block page_content %}
+    <h2>Настройки</h2>
+    {{ form(setting_form) }}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Оформление заказа{% endblock %}
+
+{% block body %}
+
+    <div class="order-container container px-4 px-lg-5 mt-3">
+
+        {{ form_start(form) }}
+
+            <div class="order-card row">
+
+                <div class="col-lg-6 order-lg-2">
+                    <h3>Ваш заказ:</h3>
+
+                    <table class="card-items table table-success">
+                        <thead>
+                        <tr>
+                            <th scope="col" class="col-8">Название</th>
+                            <th scope="col" class="col-2">Кол.</th>
+                            <th scope="col" class="col-2">Цена</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                            {% set totalSum = 0 %}
+                            {% for item in data %}
+                                <tr>
+                                    <td>
+                                        <div>{{ item.product.name }}</div>
+                                        {% set confItemPriceSum = 0 %}
+                                        {% for confItem in item.configuratorItems %}
+                                            <div class="order-conf-items">
+                                                {{ confItem.name ~ ' - ' ~ confItem.price/100 ~ ' руб.' }}
+                                                {% set confItemPriceSum = confItemPriceSum + confItem.price %}
+                                            </div>
+                                        {% endfor %}
+                                    </td>
+
+                                    <td>{{ item.quantity }}</td>
+
+                                    {% set totalRowSum = (item.product.priceMain + confItemPriceSum) * item.quantity  %}
+                                    <td>{{ totalRowSum/100 ~ ' руб.' }}</td>
+                                    {% set totalSum = totalSum + totalRowSum %}
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                    <div class="order-total-sum fw-bold float-end fs-4">Итого: {{ totalSum/100 ~ ' руб.' }}</div>
+
+                </div>
+
+                <div class="col-lg-6 order-lg-1">
+                    <h3>Ваши данные:</h3>
+                    {{ form_row(form.buyer.name) }}
+                    {{ form_row(form.buyer.phone) }}
+                    {{ form_row(form.buyer.address) }}
+                    {{ form_row(form.buyer.personCount) }}
+                    {{ form_row(form.buyer.deliveryType) }}
+                    {{ form_row(form.buyer.payType) }}
+                    {{ form_row(form.buyer.comment) }}
+                    <div class="call-me-checkbox">
+                        {{ form_row(form.buyer.callMe) }}
+                        <div> Перезвонить мне для подтверждения</div>
+                    </div>
+                </div>
+
+            </div>
+
+            {{ form_row(form.save) }}
+
+        {{ form_end(form) }}
+
+    </div>
+
+
+{% endblock %}

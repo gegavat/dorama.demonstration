@@ -1,0 +1,61 @@
+<style>
+    div {
+        margin-bottom: 8px;
+    }
+</style>
+
+<h2>Заказ с сайта dorama.ru</h2>
+
+{% if order.buyer.name %}
+    <div>Покупатель: {{ order.buyer.name }}</div>
+{% endif %}
+
+{% if order.buyer.phone %}
+    <div>Номер телефона: {{ order.buyer.phone }}</div>
+{% endif %}
+
+{% if order.buyer.address %}
+    <div>Адрес доставки: {{ order.buyer.address }}</div>
+{% endif %}
+
+{% if order.buyer.deliveryType %}
+    <div>
+        Способ получения:
+        {% if order.buyer.deliveryType == constant('App\\Entity\\Buyer::DELIVERY_TYPE_SHIPMENT') %}
+            Доставка
+        {% elseif order.buyer.deliveryType == constant('App\\Entity\\Buyer::DELIVERY_TYPE_PICKUP') %}
+            Самовывоз
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if order.buyer.payType %}
+    <div>Способ оплаты: Оплата при получении</div>
+{% endif %}
+
+{% if order.buyer.comment %}
+    <div>Комментарий: {{ order.buyer.comment }}</div>
+{% endif %}
+
+{% if order.buyer.personCount %}
+    <div>Кол. приборов: {{ order.buyer.personCount }}</div>
+{% endif %}
+
+{% if order.buyer.callMe == true %}
+    <div>Просит позвонить для подтверждения</div>
+{% endif %}
+
+<hr>
+
+<h3>Детали заказа:</h3>
+{% for orderItem in order.orderItems %}
+    <div>
+        <div>{{ orderItem.product.name }} - <b>{{ orderItem.quantity }} шт.</b></div>
+        {% for confItem in orderItem.configuratorItems %}
+            <div style="margin-left: 6px; margin-top: -4px">- {{ confItem.name }}</div>
+        {% endfor %}
+    </div>
+{% endfor %}
+
+<h3>Общая сумма заказа:</h3>
+<div>{{ orderTotalSum/100 ~ ' руб.' }}</div>

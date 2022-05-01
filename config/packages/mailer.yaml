@@ -1,0 +1,7 @@
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+        envelope:
+            sender: 'info@dorama-izh.ru'
+        headers:
+            From: 'Dorama <info@dorama-izh.ru>'
